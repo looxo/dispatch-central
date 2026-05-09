@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CODIS — Alpes Italiennes RP</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0c0f; --bg2: #111318; --bg3: #181b22;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0; --muted: #6b7280;
+    --red: #ef4444; --green: #22c55e; --blue: #3b82f6; --yellow: #eab308; --orange: #f97316;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem; border-bottom: 1px solid var(--border);
+    background: var(--bg2); position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 38px; height: 38px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .logo-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+  .logo-sub { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--orange); letter-spacing: 0.15em; }
+  .clock { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: var(--orange); }
+  .dot-live { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid var(--border); }
+  .stat { background: var(--bg2); padding: 0.75rem 1.5rem; border-right: 1px solid var(--border); }
+  .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .stat-value { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; }
+  .orange{color:var(--orange)} .green{color:var(--green)} .red{color:var(--red)} .blue{color:var(--blue)}
+  main { display: grid; grid-template-columns: 1fr 320px; min-height: calc(100vh - 120px); }
+  .tickets-panel { padding: 1.5rem 2rem; border-right: 1px solid var(--border); }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .panel-title { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .badge { background: var(--red); color: white; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; font-family: 'Share Tech Mono', monospace; }
+  .ticket {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem 1.25rem; margin-bottom: 0.75rem; position: relative;
+    overflow: hidden; animation: slideIn 0.3s ease; transition: border-color 0.2s;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .ticket:hover { border-color: var(--border2); }
+  .ticket::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+  .ticket.incendie::before { background: var(--red); }
+  .ticket.sap::before { background: var(--blue); }
+  .ticket.sr::before { background: var(--yellow); }
+  .ticket.fdf::before { background: var(--green); }
+  .ticket.police::before { background: var(--blue); }
+  .ticket.renfort::before { background: var(--orange); }
+  .ticket-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .ticket-id { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--orange); }
+  .ticket-time { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); }
+  .ticket-type { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .ticket-message { font-size: 15px; font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+  .ticket-meta { display: flex; gap: 1rem; margin-bottom: 12px; flex-wrap: wrap; }
+  .meta { font-size: 12px; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+  .ticket-actions { display: flex; gap: 8px; }
+  .btn { flex:1; padding: 9px; border: none; border-radius: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+  .btn-accept { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .btn-accept:hover { background: rgba(34,197,94,0.28); }
+  .btn-refuse { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+  .btn-refuse:hover { background: rgba(239,68,68,0.25); }
+  .ticket.accepted { opacity: 0.45; pointer-events: none; }
+  .ticket.accepted::before { background: var(--green); }
+  .ticket.refused { opacity: 0.3; pointer-events: none; }
+  .ticket.refused::before { background: var(--red); }
+  .empty { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty p { font-size: 13px; line-height: 1.8; }
+  .sidebar { background: var(--bg2); padding: 1.5rem; }
+  .sidebar-title { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1rem; }
+  .log-box { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .log-head { padding: 8px 12px; border-bottom: 1px solid var(--border); font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+  .log-list { padding: 6px; max-height: 400px; overflow-y: auto; }
+  .log-entry { display: flex; gap: 8px; padding: 4px; border-bottom: 1px solid var(--border); font-family: 'Share Tech Mono', monospace; font-size: 11px; }
+  .log-entry:last-child { border: none; }
+  .log-t { color: var(--muted); min-width: 45px; }
+  .ok { color: var(--green); } .err { color: var(--red); } .info { color: var(--blue); }
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 18px; font-size: 13px; z-index: 9999; animation: toastIn 0.3s ease; }
+  @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .toast.success { border-color: rgba(34,197,94,0.4); }
+  .toast.error { border-color: rgba(239,68,68,0.4); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🚨</div>
+    <div>
+      <div class="logo-title">CODIS — Centre de Dispatch</div>
+      <div class="logo-sub">Alpes Italiennes RP • SP de St Clément</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:1.5rem">
+    <div class="dot-live"><div class="dot"></div><span id="conn-status">Connexion...</span></div>
+    <div class="clock" id="clock">00:00:00</div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">En attente</div><div class="stat-value orange" id="s-pending">0</div></div>
+  <div class="stat"><div class="stat-label">Acceptés</div><div class="stat-value green" id="s-accepted">0</div></div>
+  <div class="stat"><div class="stat-label">Refusés</div><div class="stat-value red" id="s-refused">0</div></div>
+  <div class="stat"><div class="stat-label">Total</div><div class="stat-value blue" id="s-total">0</div></div>
+</div>
+
+<main>
+  <div class="tickets-panel">
+    <div class="panel-header">
+      <div class="panel-title">Tickets entrants</div>
+      <div class="badge" id="ticket-count">0</div>
+    </div>
+    <div id="list">
+      <div class="empty">
+        <div class="icon">📡</div>
+        <p>En attente de tickets...<br>Les alertes depuis Roblox apparaîtront ici.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-title">Journal d'activité</div>
+    <div class="log-box">
+      <div class="log-head">LOGS TEMPS RÉEL</div>
+      <div class="log-list" id="logs">
+        <div class="log-entry"><span class="log-t">--:--</span><span class="info">Système démarré</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const SERVER = 'https://dispatch-central-production.up.railway.app';
+  let stats = { pending:0, accepted:0, refused:0, total:0 };
+  let ticketCount = 0;
+
+  // Horloge
+  setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
+  }, 1000);
+
+  // Stats
+  function updateStats() {
+    document.getElementById('s-pending').textContent  = stats.pending;
+    document.getElementById('s-accepted').textContent = stats.accepted;
+    document.getElementById('s-refused').textContent  = stats.refused;
+    document.getElementById('s-total').textContent    = stats.total;
+  }
+
+  // Log
+  function log(msg, type='info') {
+    const t = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+    const el = document.createElement('div');
+    el.className = 'log-entry';
+    el.innerHTML = `<span class="log-t">${t}</span><span class="${type}">${msg}</span>`;
+    const box = document.getElementById('logs');
+    box.insertBefore(el, box.firstChild);
+    if (box.children.length > 60) box.lastChild.remove();
+  }
+
+  // Toast
+  function toast(msg, type='success') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  // Type → classe CSS
+  function typeClass(type) {
+    if (type.includes('Incendie')) return 'incendie';
+    if (type.includes('SAP'))      return 'sap';
+    if (type.includes('SR'))       return 'sr';
+    if (type.includes('FDF'))      return 'fdf';
+    if (type.includes('Police'))   return 'police';
+    return 'renfort';
+  }
+
+  // Ajoute un ticket
+  function addTicket(ticket) {
+    ticketCount++;
+    stats.pending++;
+    stats.total++;
+    updateStats();
+    document.getElementById('ticket-count').textContent = ticketCount;
+
+    const list = document.getElementById('list');
+    const empty = list.querySelector('.empty');
+    if (empty) empty.remove();
+
+    const el = document.createElement('div');
+    el.className = `ticket ${typeClass(ticket.typeIntervention || '')}`;
+    el.id = 'tk-' + ticket.id;
+    el.innerHTML = `
+      <div class="ticket-top">
+        <span class="ticket-id">${ticket.id}</span>
+        <span class="ticket-time">${ticket.time}</span>
+      </div>
+      <div class="ticket-type">${ticket.typeIntervention}</div>
+      <div class="ticket-message">${ticket.message}</div>
+      <div class="ticket-meta">
+        <span class="meta">📍 ${ticket.position}</span>
+        <span class="meta">👤 ${ticket.operator}</span>
+        <span class="meta">🎮 ${ticket.jeu}</span>
+      </div>
+      <div class="ticket-actions">
+        <button class="btn btn-accept" onclick="accept('${ticket.id}')">✅ Accepter & Alerter</button>
+        <button class="btn btn-refuse" onclick="refuse('${ticket.id}')">❌ Refuser</button>
+      </div>
+    `;
+    list.insertBefore(el, list.firstChild);
+    log(`Ticket reçu : ${ticket.typeIntervention} — ${ticket.operator}`, 'info');
+    toast(`📨 ${ticket.typeIntervention} — ${ticket.operator}`);
+  }
+
+  // Accepter
+  async function accept(id) {
+    const el = document.getElementById('tk-' + id);
+    if (!el) return;
+    el.classList.add('accepted');
+    stats.pending = Math.max(0, stats.pending - 1);
+    stats.accepted++;
+    updateStats();
+
+    await fetch(SERVER + '/accept', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticketId: id, dispatcherName: 'Dispatch CODIS' })
+    });
+
+    log(`✅ ${id} accepté — alerte Discord envoyée`, 'ok');
+    toast('🚨 Alerte envoyée sur Discord !');
+  }
+
+  // Refuser
+  async function refuse(id) {
+    const el = document.getElementById('tk-' + id);
+    if (!el) return;
+    el.classList.add('refused');
+    stats.pending = Math.max(0, stats.pending - 1);
+    stats.refused++;
+    updateStats();
+
+    await fetch(SERVER + '/refuse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticketId: id })
+    });
+
+    log(`❌ ${id} refusé`, 'err');
+    toast('🚫 Ticket refusé', 'error');
+  }
+
+  // Connexion SSE
+  function connectSSE() {
+    const es = new EventSource(SERVER + '/events');
+
+    es.onopen = () => {
+      document.getElementById('conn-status').textContent = 'En ligne';
+      log('Connecté au serveur', 'ok');
+    };
+
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type === 'new_ticket') addTicket(data.ticket);
+    };
+
+    es.onerror = () => {
+      document.getElementById('conn-status').textContent = 'Reconnexion...';
+      log('Connexion perdue — reconnexion...', 'err');
+      es.close();
+      setTimeout(connectSSE, 3000);
+    };
+  }
+
+  connectSSE();
+  updateStats();
+</script>
+</body>
+</html>
