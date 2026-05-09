@@ -1,5 +1,6 @@
 const express = require('express');
 const cors    = require('cors');
+const path    = require('path');
 const app     = express();
 const PORT    = process.env.PORT || 3000;
 
@@ -14,7 +15,6 @@ let spamMap       = {};
 let ticketCounter = 0;
 const SPAM_DELAY  = 30;
 
-// Reçoit un ticket depuis Roblox
 app.post('/ticket', (req, res) => {
   const { message, typeIntervention, position, operator, userId, time, secret, jeu } = req.body;
 
@@ -48,7 +48,6 @@ app.post('/ticket', (req, res) => {
   res.json({ success: true, ticketId: ticket.id });
 });
 
-// Dispatch accepte
 app.post('/accept', async (req, res) => {
   const { ticketId, dispatcherName } = req.body;
   const ticket = tickets.find(t => t.id === ticketId);
@@ -65,7 +64,6 @@ app.post('/accept', async (req, res) => {
   res.json({ success: true });
 });
 
-// Dispatch refuse
 app.post('/refuse', (req, res) => {
   const { ticketId } = req.body;
   const ticket = tickets.find(t => t.id === ticketId);
@@ -80,7 +78,6 @@ app.post('/refuse', (req, res) => {
   res.json({ success: true });
 });
 
-// Stream SSE pour le site
 app.get('/events', (req, res) => {
   res.setHeader('Content-Type',  'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -96,10 +93,8 @@ app.get('/events', (req, res) => {
   req.on('close', () => { clients = clients.filter(c => c.id !== client.id); });
 });
 
-// Historique
 app.get('/tickets', (req, res) => res.json(tickets));
 
-// Stats
 app.get('/stats', (req, res) => res.json({
   total:    tickets.length,
   pending:  tickets.filter(t => t.status === 'pending').length,
@@ -107,10 +102,8 @@ app.get('/stats', (req, res) => res.json({
   refused:  tickets.filter(t => t.status === 'refused').length,
 }));
 
-// Ping
 app.get('/ping', (req, res) => res.json({ status: 'ok' }));
 
-// Alerte Discord
 const ROLE_IDS = {
   '🔥 Incendie': '1502223889533501480',
   '🌲 FDF':      '1502223889533501480',
@@ -174,6 +167,10 @@ async function sendDiscordAlert(ticket) {
     console.error('[DISCORD] Erreur réseau :', e.message);
   }
 }
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`🚨 Dispatch Central — Port ${PORT}`);
